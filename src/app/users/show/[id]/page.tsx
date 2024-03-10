@@ -2,13 +2,10 @@
 
 import React from 'react';
 import {
-  DateField,
-  MarkdownField,
-  NumberField,
   Show,
   TextField,
 } from "@refinedev/antd";
-import { useOne, useShow } from "@refinedev/core";
+import { useShow } from "@refinedev/core";
 import { Typography, Row, Col } from "antd";
 
 const { Title } = Typography;

@@ -1,34 +1,18 @@
 "use client";
 
-// Import necessary modules and components
-import React, { useState, useEffect } from 'react';
-import { Create, useForm, useSelect } from "@refinedev/antd";
+import { Create, useForm } from "@refinedev/antd";
 import { Form, Input, Upload, Row, Col, Select, InputNumber } from "antd";
 import Cookies from 'js-cookie';
+import dotenv from 'dotenv';
 
 // Define the PropertyCreate component
 export default function PropertyCreate() {
   const { formProps, saveButtonProps } = useForm({});
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  dotenv.config();
 
-  // Effect to detect dark mode
-  useEffect(() => {
-    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const cloudName = process.env.CLOUD_NAME;
+  const presetKey = process.env.PRESET_KEY;
 
-    const updateDarkMode = () => {
-      setIsDarkMode(darkModeQuery.matches);
-    };
-
-    darkModeQuery.addListener(updateDarkMode);
-    updateDarkMode();
-
-    return () => {
-      darkModeQuery.removeListener(updateDarkMode);
-    };
-  }, []);
-
-  const cloudName = 'dfz33bzhu';
-  const presetKey = 'xmzadk8w';
   const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
   // Récupérez les informations de l'utilisateur à partir du cookie

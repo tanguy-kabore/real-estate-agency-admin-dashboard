@@ -1,39 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Edit, useForm, useSelect } from "@refinedev/antd";
+import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input, Select, Upload, Row, Col, Space, Button } from "antd";
-import { CountryDropdown, RegionDropdown } from 'react-country-region-selector';
-import { UserOutlined, MailOutlined, PhoneOutlined, GlobalOutlined, SmileOutlined, UsergroupAddOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import 'react-phone-number-input/style.css';
-import PhoneInput from 'react-phone-number-input';
+import { UserOutlined, MailOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import dotenv from 'dotenv';
 
 export default function CreateCreate() {
   const { formProps, saveButtonProps, queryResult } = useForm({});
-  const [country, setCountry] = useState('');
-  const [region, setRegion] = useState('');
-  const [value, setValue] = useState<any>();
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  dotenv.config();
 
-  useEffect(() => {
-    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    const updateDarkMode = () => {
-      setIsDarkMode(darkModeQuery.matches);
-    };
-
-    darkModeQuery.addListener(updateDarkMode);
-    updateDarkMode();
-
-    return () => {
-      darkModeQuery.removeListener(updateDarkMode);
-    };
-  }, []);
-
-  const cloudName = 'dfz33bzhu';
-  const apiKey = '579581259945131';
-  const apiSecret = 'U2PriJyyhJhzKFkB7TZA4VDYkCU'
-  const presetKey = 'xmzadk8w'
+  const cloudName = process.env.CLOUD_NAME;
+  const presetKey = process.env.PRESET_KEY;
 
   const apiUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
 
