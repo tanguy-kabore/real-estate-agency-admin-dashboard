@@ -2,45 +2,79 @@
 
 import { AuthBindings } from "@refinedev/core";
 import Cookies from "js-cookie";
+import jwt, { Secret, JwtPayload } from "jsonwebtoken";
+import { jwtDecode } from "jwt-decode";
+import dotenv from 'dotenv';
 
-const mockUsers = [
-  {
-    name: "John Doe",
-    email: "johndoe@mail.com",
-    roles: ["admin"],
-    avatar: "https://i.pravatar.cc/150?img=1",
-  },
-  {
-    name: "Jane Doe",
-    email: "janedoe@mail.com",
-    roles: ["editor"],
-    avatar: "https://i.pravatar.cc/150?img=1",
-  },
-];
+dotenv.config();
+
+// Clé secrète pour signer et vérifier le JWT (doit être stockée de manière sécurisée côté serveur)
+const secretKey: Secret | undefined = process.env.NEXT_PUBLIC_SECRET_KEY;
 
 export const authProvider: AuthBindings = {
-  login: async ({ email, username, password, remember }) => {
-    // Suppose we actually send a request to the back end here.
-    const user = mockUsers[0];
-
-    if (user) {
-      Cookies.set("auth", JSON.stringify(user), {
-        expires: 30, // 30 days
-        path: "/",
+  login: async ({ email, password, remember }) => {
+    try {
+      const response = await fetch('https://real-estate-agency-rest-api.onrender.com/api/v1/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
-      return {
-        success: true,
-        redirectTo: "/",
-      };
-    }
 
-    return {
-      success: false,
-      error: {
-        name: "LoginError",
-        message: "Invalid username or password",
-      },
-    };
+      if (response.ok) {
+        const { token } = await response.json();
+        console.log("Generated Token:", JSON.stringify(token));
+
+        const decoded = jwtDecode(token);
+        console.log("Decoded Token:", decoded);
+
+        // Vérifier et décoder le JWT
+        /* const decoded = jwt.verify(token, secretKey || "") as JwtPayload;
+        console.log("Decoded Token:", decoded); */
+
+        // Stocker les informations de l'utilisateur dans le cookie
+        Cookies.set("auth", JSON.stringify(decoded), {
+          expires: remember ? 30 : 1,
+          path: "/",
+          sameSite: "None",
+        });
+
+        console.log("Redirecting to /");
+        return {
+          success: true,
+          redirectTo: "/",
+        };
+      } else {
+        return {
+          success: false,
+          error: {
+            name: "LoginError",
+            message: "Identifiant ou mot de passe incorrect",
+          },
+        };
+      }
+    } catch (error) {
+      console.error("Erreur de connexion :", error);
+
+      if (error instanceof jwt.JsonWebTokenError) {
+        return {
+          success: false,
+          error: {
+            name: "DecodeError",
+            message: "Erreur lors du décodage du token",
+          },
+        };
+      } else {
+        return {
+          success: false,
+          error: {
+            name: "LoginError",
+            message: "Une erreur s'est produite lors de la connexion",
+          },
+        };
+      }
+    }
   },
   logout: async () => {
     Cookies.remove("auth", { path: "/" });
